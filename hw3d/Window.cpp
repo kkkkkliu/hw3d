@@ -14,15 +14,15 @@ Window::WindowClass::WindowClass() noexcept :hInst( GetModuleHandle(nullptr) ){
 	wc.cbWndExtra = 0;
 	wc.hInstance = GetInstance();
 	wc.hIcon = static_cast<HICON>(LoadImage(
-		GetInstance(), MAKEINTRESOURCE(IDI_ICON1),
-		IMAGE_ICON, 32, 32, 0
+		GetInstance(), MAKEINTRESOURCE(IDI_ICON2),
+		IMAGE_ICON, 48, 48, 0
 	));
 	wc.hCursor = nullptr;
 	wc.hbrBackground = nullptr;
 	wc.lpszMenuName = nullptr;
 	wc.lpszClassName = GetName();
 	wc.hIconSm = static_cast<HICON>(LoadImage(
-		GetInstance(), MAKEINTRESOURCE(IDI_ICON1),
+		GetInstance(), MAKEINTRESOURCE(IDI_ICON2),
 		IMAGE_ICON, 16, 16, 0
 	));;
 	RegisterClassEx(&wc);
@@ -92,6 +92,26 @@ LRESULT Window::HandleMsg(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noe
 	case WM_CLOSE:
 		PostQuitMessage(0);
 		return 0;
+	case WM_KILLFOCUS:
+		kbd.ClearState();
+		break;
+
+
+	case WM_KEYDOWN:
+
+	case WM_SYSKEYDOWN:
+		if (!(lParam & 0x40000000) || kbd.AutorepeatIsEnabled())
+		{
+			kbd.OnKeyPressed(static_cast<unsigned char>(wParam));
+		}
+		break;
+	case WM_KEYUP:
+	case WM_SYSKEYUP:
+		kbd.OnKeyReleased(static_cast<unsigned char>(wParam));
+		break;
+	case WM_CHAR:
+		kbd.OnChar(static_cast<unsigned char>(wParam));
+		break;
 	}
 
 	return DefWindowProcW(hWnd, msg, wParam, lParam);
