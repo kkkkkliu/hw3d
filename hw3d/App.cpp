@@ -4,24 +4,18 @@ App::App() :
 	wnd(800,600,TEXT("3D Window")) { }
 
 int App::Go() {
-	MSG msg;
-	BOOL gResult;
-	while ( (gResult = GetMessage( &msg,nullptr,0,0)) > 0 )
+	while (true)
 	{
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-
+		if (const auto ecode = Window::ProcessMessage()) {
+			return *ecode;
+		}
 		DoFrame();
 	}
-
-	if (gResult == -1)
-	{
-		throw std::exception();
-	}
-
-	return msg.wParam;
 }
 
 void App::DoFrame() {
-
+	//const float t = timer.Peek();
+	//std::wostringstream oss;
+	//oss << std::setprecision(1)<<std::fixed<<t;
+	//wnd.SetTitle(oss.str());
 }
