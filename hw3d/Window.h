@@ -2,8 +2,10 @@
 
 #include <Windows.h>
 #include <sstream>
+#include <memory>
 #include "Keyboard.h"
 #include "Mouse.h"
+#include "Graphics.h"
 
 class Window
 {
@@ -29,6 +31,7 @@ public:
 	Window& operator=(const Window&) = delete;
 	void SetTitle(const std::wstring& title);
 	static std::optional<int> ProcessMessage();
+	Graphics& Gfx();
 private:
 	static LRESULT CALLBACK HandleMsgSetup(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
 	static LRESULT CALLBACK HandleMsgThunk(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) noexcept;
@@ -40,4 +43,5 @@ private:
 	int width;
 	int height;
 	HWND hwnd;
+	std::unique_ptr<Graphics> pGfx;
 };
