@@ -1,8 +1,11 @@
 #include "Graphics.h"
+#include <d3dcompiler.h>
+#include <iostream>
 
 namespace wrl = Microsoft::WRL;
 
 #pragma comment(lib,"d3d11.lib")
+#pragma comment(lib,"D3DCompiler.lib")
 
 Graphics::Graphics(HWND hWnd) {
 	DXGI_SWAP_CHAIN_DESC sd = {};
@@ -55,4 +58,48 @@ void Graphics::ClearBuffer(float red, float green, float blue) noexcept
 {
 	const float color[] = { red,green,blue,1.0f };
 	pContext->ClearRenderTargetView(pTarget.Get(), color);
-};
+}
+void Graphics::DrawTestTriangle()
+{
+	namespace wrl = Microsoft::WRL;
+
+	struct Vertex
+	{
+		float x;
+		float y;
+	};
+	const Vertex vertices[] = {
+		{0.0f,0.5f},
+		{0.5f,-0.5f},
+		{-0.5f,-0.5f}
+	};
+
+	wrl::ComPtr<ID3D11Buffer> pVertexBuffer;
+	D3D11_BUFFER_DESC bd = {};
+	bd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	bd.Usage = D3D11_USAGE_DEFAULT;
+	bd.CPUAccessFlags = 0u;
+	bd.MiscFlags = 0u;
+	bd.ByteWidth = sizeof(vertices);
+	bd.StructureByteStride = sizeof(Vertex);
+	D3D11_SUBRESOURCE_DATA sd = {};
+	sd.pSysMem = vertices;
+	pDevice->CreateBuffer(&bd,&sd,&pVertexBuffer);
+
+	const UINT stride = sizeof(Vertex);
+	const UINT offset = 0u;
+	pContext->IASetVertexBuffers(0u,1u,&pVertexBuffer,&stride,&offset);
+	
+
+	//Vertex Shader
+	wrl::ComPtr<ID3D11VertexShader> pVertexShader;
+	wrl::ComPtr<ID3DBlob> pBlob;
+	D3DReadFileToBlob(L"VertexShader.cso", &pBlob);
+	pDevice->CreateVertexShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), nullptr, &pVertexShader);
+
+	//bind vertexshader
+	pContext->VSSetShader(pVertexShader.Get(), nullptr, 0u);
+
+	pContext->Draw((UINT)std::size(vertices), 0u);
+}
+;
